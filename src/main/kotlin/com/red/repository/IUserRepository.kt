@@ -2,7 +2,7 @@ package com.red.repository
 
 import com.red.models.User
 
-interface Repository {
+interface IUserRepository {
 
     suspend fun addUser(email: String, displayName: String, passwordHash: String): User?
     suspend fun findUser(userId: Int): User?

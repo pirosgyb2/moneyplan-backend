@@ -1,10 +1,24 @@
 package com.red.plugins
 
+import com.red.auth.JwtService
+import com.red.repository.UserRepository
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 
-fun Application.configureSecurity() {
+fun Application.configureSecurity(userRepository: UserRepository, jwtService: JwtService) {
     install(Authentication) {
+        jwt("jwt") {
+            verifier(jwtService.verifier)
+            realm = "Moneyplan Server"
+            validate {
+                val payload = it.payload
+                val claim = payload.getClaim("id")
+                val claimString = claim.asInt()
+                val user = userRepository.findUser(claimString)
+                user
+            }
+        }
     }
 }
 //    val jwtIssuer = environment.config.property("jwt.domain").getString()
