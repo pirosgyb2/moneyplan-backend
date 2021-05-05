@@ -1,9 +1,9 @@
 package com.red.models
 
 data class Category(
-    var id: Int,
-    var userId: Int,
+    var id: Int? = null,
+    var userId: Int? = null,
     var name: String = "",
     var parent: Int? = null,
-    var children: List<Int> = emptyList(),
+    var childrenCategories: Array<Int>? = null,
 )

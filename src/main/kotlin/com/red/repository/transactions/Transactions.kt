@@ -17,7 +17,4 @@ object Transactions : Table() {
     val categories: Column<Array<Int>> = array("categories", IntegerColumnType())
     val elements: Column<Array<Int>> = array("elements", IntegerColumnType())
     val type = varchar("type", 256)
-    //    val categories: Column<List<Int>> = varchar("categories",2147483600)
-//    val elements : Column<List<Int>> = varchar("elements",2147483600)
-
 }

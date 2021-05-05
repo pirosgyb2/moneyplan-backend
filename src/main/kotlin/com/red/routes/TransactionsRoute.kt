@@ -35,7 +35,7 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
             val validatedTransaction = call.validateTransaction(transaction, userId) ?: return@post
 
             try {
-                val currentTransaction = transactionRepository.addTransaction(transaction)
+                val currentTransaction = transactionRepository.addTransaction(validatedTransaction)
                 currentTransaction?.id?.let {
                     call.respond(HttpStatusCode.OK, currentTransaction)
                 }
@@ -102,7 +102,7 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
                 }
             } catch (e: Throwable) {
                 application.log.error("Failed to delete transaction", e)
-                call.respond(HttpStatusCode.BadRequest, "Problems getting transactions")
+                call.respond(HttpStatusCode.BadRequest, "Problems deleting transactions")
             }
         }
 

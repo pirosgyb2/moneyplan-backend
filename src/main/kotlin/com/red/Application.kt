@@ -7,6 +7,7 @@ import com.red.plugins.configureSecurity
 import com.red.plugins.configureSerialization
 import com.red.plugins.configureSessions
 import com.red.repository.DatabaseFactory
+import com.red.repository.categories.CategoryRepository
 import com.red.repository.transactions.TransactionRepository
 import com.red.repository.users.UserRepository
 import io.ktor.application.*
@@ -17,17 +18,19 @@ import io.ktor.server.netty.*
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         install(Locations) {}
+
         configureSessions()
 
         DatabaseFactory.init()
         val userRepository = UserRepository()
         val transactionRepository = TransactionRepository()
+        val categoryRepository = CategoryRepository()
         val jwtService = JwtService()
         val hashFunction = { s: String -> hash(s) }
 
         configureSecurity(userRepository, jwtService)
         configureSerialization()
-        configureRouting(userRepository, transactionRepository, jwtService, hashFunction)
+        configureRouting(userRepository, transactionRepository, categoryRepository, jwtService, hashFunction)
     }.start(wait = true)
 }
 

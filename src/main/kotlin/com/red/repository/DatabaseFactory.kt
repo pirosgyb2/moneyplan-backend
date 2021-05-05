@@ -1,5 +1,6 @@
 package com.red.repository
 
+import com.red.repository.categories.Categories
 import com.red.repository.transactions.Transactions
 import com.red.repository.users.Users
 import com.zaxxer.hikari.HikariConfig
@@ -18,6 +19,7 @@ object DatabaseFactory {
         transaction {
             SchemaUtils.create(Users)
             SchemaUtils.create(Transactions)
+            SchemaUtils.create(Categories)
         }
     }
 
