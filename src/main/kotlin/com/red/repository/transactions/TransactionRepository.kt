@@ -44,6 +44,27 @@ class TransactionRepository : ITransactionRepository {
         return deletedRowNumber > 0
     }
 
+    override suspend fun updateTransaction(userId: Int, transaction: Transaction): Boolean {
+
+        val updatedRows = dbQuery {
+            Transactions.update(
+                where = { Transactions.userId.eq(userId) and Transactions.id.eq(transaction.id ?: -1) },
+                body =
+                {
+                    it[Transactions.userId] = transaction.userId ?: 0
+                    it[Transactions.id] = transaction.id ?: 0
+                    it[Transactions.name] = transaction.name ?: ""
+                    it[Transactions.categories] = transaction.categories
+                    it[Transactions.date] = transaction.date ?: LocalDateTime.now()
+                    it[Transactions.type] = transaction.type ?: "MAIN"
+                    it[Transactions.elements] = transaction.elements
+                    it[Transactions.currency] = transaction.currency ?: ""
+                    it[Transactions.totalCost] = transaction.totalCost ?: 0.0
+                })
+        }
+
+        return updatedRows > 0
+    }
 
     private fun rowToTransaction(row: ResultRow?): Transaction? {
         if (row == null) {

@@ -58,7 +58,7 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
                     call.respond(HttpStatusCode.OK, currentTransaction)
                 }
             } catch (e: Throwable) {
-                application.log.error("Failed to add todo", e)
+                application.log.error("Failed to add transaction", e)
                 call.respond(HttpStatusCode.BadRequest, "Problems Saving transaction")
             }
         }
@@ -98,8 +98,8 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
                         savedTransactions.add(currentTransaction)
                     }
                 } catch (e: Throwable) {
-                    application.log.error("Failed to add todo", e)
-                    call.respond(HttpStatusCode.BadRequest, "Problems Saving transaction")
+                    application.log.error("Failed to add transactions", e)
+                    call.respond(HttpStatusCode.BadRequest, "Problems Saving transactions")
                 }
             }
             call.respond(HttpStatusCode.OK, savedTransactions)
@@ -147,7 +147,43 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
             }
         }
 
+        put<TransactionRoute> {
+            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
+            if (user == null) {
+                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
+                return@put
+            }
+
+            val transaction = call.receive<Transaction>()
+
+            if (transaction.id == null) {
+                return@put call.respond(
+                    HttpStatusCode.BadRequest, "Missing id"
+                )
+            }
+
+            if (transaction.userId == null) {
+                transaction.userId = user.userId
+            }
+            if (transaction.type == null) {
+                return@put call.respond(
+                    HttpStatusCode.BadRequest, "Missing type"
+                )
+            }
+
+            try {
+                val isSuccessful = transactionRepository.updateTransaction(user.userId, transaction)
+                if (isSuccessful) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, "Problems updating transaction")
+                }
+            } catch (e: Throwable) {
+                application.log.error("Failed to add transaction", e)
+                call.respond(HttpStatusCode.BadRequest, "Problems updating transaction")
+            }
+        }
+
+
     }
-
-
 }
