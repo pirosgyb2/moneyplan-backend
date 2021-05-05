@@ -29,28 +29,10 @@ class TransactionsRoute
 fun Route.transactions(transactionRepository: TransactionRepository, userRepository: UserRepository) {
     authenticate("jwt") {
         post<TransactionRoute> {
-            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
-            if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
-                return@post
-            }
+            val userId = call.getUserId(userRepository) ?: return@post
 
             val transaction = call.receive<Transaction>()
-
-            if (transaction.id == null) {
-                return@post call.respond(
-                    HttpStatusCode.BadRequest, "Missing id"
-                )
-            }
-
-            if (transaction.userId == null) {
-                transaction.userId = user.userId
-            }
-            if (transaction.type == null) {
-                return@post call.respond(
-                    HttpStatusCode.BadRequest, "Missing type"
-                )
-            }
+            val validatedTransaction = call.validateTransaction(transaction, userId) ?: return@post
 
             try {
                 val currentTransaction = transactionRepository.addTransaction(transaction)
@@ -64,34 +46,17 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
         }
 
         post<TransactionsRoute> {
-            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
-            if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
-                return@post
-            }
+            val userId = call.getUserId(userRepository) ?: return@post
 
             val transactions = call.receive<Array<Transaction>>()
             val savedTransactions = ArrayList<Transaction>()
 
             transactions.forEach { transaction ->
-                if (transaction.id == null) {
-                    return@post call.respond(
-                        HttpStatusCode.BadRequest, "Missing id"
-                    )
-                }
 
-                if (transaction.userId == null) {
-                    transaction.userId = user.userId
-                }
-                if (transaction.type == null) {
-                    return@post call.respond(
-                        HttpStatusCode.BadRequest, "Missing type"
-                    )
-                }
+                val validatedTransaction = call.validateTransaction(transaction, userId) ?: return@post
 
                 try {
-
-                    val currentTransaction = transactionRepository.addTransaction(transaction)
+                    val currentTransaction = transactionRepository.addTransaction(validatedTransaction)
                     if (currentTransaction?.id == null) {
                         throw Exception("Failed to save transaction")
                     } else {
@@ -102,17 +67,15 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
                     call.respond(HttpStatusCode.BadRequest, "Problems Saving transactions")
                 }
             }
+
             call.respond(HttpStatusCode.OK, savedTransactions)
         }
 
         get<TransactionsRoute> {
-            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
-            if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
-                return@get
-            }
+            val userId = call.getUserId(userRepository) ?: return@get
+
             try {
-                val transactions = transactionRepository.getTransactions(user.userId)
+                val transactions = transactionRepository.getTransactions(userId)
                 call.respond(transactions)
             } catch (e: Throwable) {
                 application.log.error("Failed to get transactions", e)
@@ -121,21 +84,17 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
         }
 
         delete<TransactionRoute> {
-            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
-            if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
-                return@delete
-            }
+            val userId = call.getUserId(userRepository) ?: return@delete
 
             val params = call.receive<Parameters>()
             val transactionId = params["transactionId"]?.toInt()
             if (transactionId == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing transction id")
+                call.respond(HttpStatusCode.BadRequest, "Missing transaction id")
                 return@delete
             }
 
             try {
-                val isSuccessful = transactionRepository.deleteTransaction(user.userId, transactionId)
+                val isSuccessful = transactionRepository.deleteTransaction(userId, transactionId)
                 if (isSuccessful) {
                     call.respond(HttpStatusCode.OK)
                 } else {
@@ -148,31 +107,13 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
         }
 
         put<TransactionRoute> {
-            val user = call.sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
-            if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
-                return@put
-            }
+            val userId = call.getUserId(userRepository) ?: return@put
 
             val transaction = call.receive<Transaction>()
-
-            if (transaction.id == null) {
-                return@put call.respond(
-                    HttpStatusCode.BadRequest, "Missing id"
-                )
-            }
-
-            if (transaction.userId == null) {
-                transaction.userId = user.userId
-            }
-            if (transaction.type == null) {
-                return@put call.respond(
-                    HttpStatusCode.BadRequest, "Missing type"
-                )
-            }
+            val validatedTransaction = call.validateTransaction(transaction, userId) ?: return@put
 
             try {
-                val isSuccessful = transactionRepository.updateTransaction(user.userId, transaction)
+                val isSuccessful = transactionRepository.updateTransaction(userId, validatedTransaction)
                 if (isSuccessful) {
                     call.respond(HttpStatusCode.OK)
                 } else {
@@ -184,6 +125,31 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
             }
         }
 
-
     }
+}
+
+private suspend fun ApplicationCall.getUserId(userRepository: UserRepository): Int? {
+    val user = sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
+    if (user == null) {
+        respond(HttpStatusCode.BadRequest, "Problems retrieving User")
+    }
+    return user?.userId
+}
+
+private suspend fun ApplicationCall.validateTransaction(transaction: Transaction, userId: Int): Transaction? {
+    if (transaction.id == null) {
+        respond(HttpStatusCode.BadRequest, "Missing id")
+        return null
+    }
+
+    if (transaction.userId == null) {
+        transaction.userId = userId
+    }
+
+    if (transaction.type == null) {
+        respond(HttpStatusCode.BadRequest, "Missing type")
+        return null
+    }
+
+    return transaction
 }
