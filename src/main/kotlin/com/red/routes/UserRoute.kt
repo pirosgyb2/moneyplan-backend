@@ -3,7 +3,7 @@ package com.red.routes
 import com.red.API_VERSION
 import com.red.auth.JwtService
 import com.red.auth.MySession
-import com.red.repository.UserRepository
+import com.red.repository.users.UserRepository
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.locations.*
@@ -51,10 +51,8 @@ fun Route.users(
             val newUser = repository.addUser(email, displayName, hash)
             newUser?.userId?.let {
                 call.sessions.set(MySession(it))
-                val token = jwtService.generateToken(newUser)
-                println("-------$token-------")
                 call.respondText(
-                    token,
+                    jwtService.generateToken(newUser),
                     status = HttpStatusCode.Created
                 )
             }

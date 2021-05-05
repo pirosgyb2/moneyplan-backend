@@ -1,7 +1,7 @@
 package com.red.plugins
 
 import com.red.auth.JwtService
-import com.red.repository.UserRepository
+import com.red.repository.users.UserRepository
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*

@@ -1,5 +1,7 @@
 package com.red.repository
 
+import com.red.repository.transactions.Transactions
+import com.red.repository.users.Users
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.Dispatchers

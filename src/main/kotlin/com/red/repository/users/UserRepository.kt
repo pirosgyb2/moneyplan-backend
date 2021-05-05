@@ -1,4 +1,4 @@
-package com.red.repository
+package com.red.repository.users
 
 import com.red.models.User
 import com.red.repository.DatabaseFactory.dbQuery
