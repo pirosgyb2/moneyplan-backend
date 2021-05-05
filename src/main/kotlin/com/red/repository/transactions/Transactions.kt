@@ -14,7 +14,7 @@ object Transactions : Table() {
     val totalCost = double("totalCost")
     val currency = varchar("currency", 256)
     val date = datetime("date")
-    val categories: Column<Array<Int>> = array("categories", IntegerColumnType())
-    val elements: Column<Array<Int>> = array("elements", IntegerColumnType())
+    val categories: Column<Array<Int>?> = array<Int>("categories", IntegerColumnType()).nullable()
+    val elements: Column<Array<Int>?> = array<Int>("elements", IntegerColumnType()).nullable()
     val type = varchar("type", 256)
 }

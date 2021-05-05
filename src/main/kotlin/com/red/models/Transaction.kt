@@ -9,7 +9,7 @@ data class Transaction(
     var totalCost: Double = 0.0,
     var currency: String = "HUF",
     var date: LocalDateTime = LocalDateTime.now(),
-    var categories: Array<Int>,
-    var elements: Array<Int>,
+    var categories: Array<Int>? = null,
+    var elements: Array<Int>? = null,
     var type: String? = null
 )
