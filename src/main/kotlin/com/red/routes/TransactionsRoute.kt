@@ -131,7 +131,7 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
 private suspend fun ApplicationCall.getUserId(userRepository: UserRepository): Int? {
     val user = sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
     if (user == null) {
-        respond(HttpStatusCode.BadRequest, "Problems retrieving User")
+        respond(HttpStatusCode.Unauthorized)
     }
     return user?.userId
 }

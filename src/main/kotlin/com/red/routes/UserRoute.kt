@@ -15,6 +15,7 @@ import io.ktor.sessions.*
 const val USERS = "$API_VERSION/users"
 const val USER_LOGIN = "$USERS/login"
 const val USER_CREATE = "$USERS/create"
+const val USER_LOGOUT = "$USERS/logout"
 
 
 @KtorExperimentalLocationsAPI
@@ -25,6 +26,11 @@ class UserLoginRoute
 @KtorExperimentalLocationsAPI
 @Location(USER_CREATE)
 class UserCreateRoute
+
+@KtorExperimentalLocationsAPI
+@Location(USER_LOGOUT)
+class UserLogoutRoute
+
 
 @KtorExperimentalLocationsAPI
 fun Route.users(
@@ -90,4 +96,15 @@ fun Route.users(
             call.respond(HttpStatusCode.BadRequest, "Problems retrieving User")
         }
     }
+
+    post<UserLogoutRoute> {
+        try {
+            call.sessions.clear<MySession>()
+            call.respond(HttpStatusCode.OK)
+        } catch (e: Throwable) {
+            application.log.error("Failed to logout user", e)
+            call.respond(HttpStatusCode.BadRequest, "Problems logout User")
+        }
+    }
+
 }
