@@ -51,8 +51,6 @@ class GoalRepository : IGoalRepository {
                 where = { Goals.userId.eq(userId) and Goals.id.eq(goal.id ?: -1) },
                 body =
                 {
-                    it[Goals.userId] = goal.userId ?: 0
-                    it[Goals.id] = goal.id ?: 0
                     it[Goals.name] = goal.name ?: ""
                     it[Goals.targetDate] = goal.targetDate
                     it[Goals.creationDate] = goal.creationDate ?: LocalDateTime.now()

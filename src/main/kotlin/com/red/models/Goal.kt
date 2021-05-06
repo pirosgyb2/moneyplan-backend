@@ -10,5 +10,5 @@ data class Goal(
     var creationDate: LocalDateTime = LocalDateTime.now(),
     var goalMoney: Double = 0.0,
     var targetAmount: Double = 0.0,
-    var savings: Array<GoalSaving>? = null,
+    var savings: String? = null,
 )
