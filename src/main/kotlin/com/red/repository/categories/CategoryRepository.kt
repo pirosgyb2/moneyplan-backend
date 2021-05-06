@@ -45,8 +45,6 @@ class CategoryRepository : ICategoriesRepository {
                 where = { Categories.userId.eq(userId) and Categories.id.eq(category.id ?: -1) },
                 body =
                 {
-                    it[Categories.userId] = category.userId ?: 0
-                    it[id] = category.id ?: 0
                     it[name] = category.name ?: ""
                     it[parent] = category.parent
                     it[childrenCategories] = category.childrenCategories

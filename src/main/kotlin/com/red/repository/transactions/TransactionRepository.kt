@@ -51,8 +51,6 @@ class TransactionRepository : ITransactionRepository {
                 where = { Transactions.userId.eq(userId) and Transactions.id.eq(transaction.id ?: -1) },
                 body =
                 {
-                    it[Transactions.userId] = transaction.userId ?: 0
-                    it[Transactions.id] = transaction.id ?: 0
                     it[Transactions.name] = transaction.name ?: ""
                     it[Transactions.categories] = transaction.categories
                     it[Transactions.date] = transaction.date ?: LocalDateTime.now()
