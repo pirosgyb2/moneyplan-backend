@@ -3,6 +3,9 @@ package com.red.routes
 import com.red.API_VERSION
 import com.red.auth.JwtService
 import com.red.auth.MySession
+import com.red.models.containers.LoginBody
+import com.red.models.containers.RegistrationBody
+import com.red.models.containers.SessionResponse
 import com.red.repository.users.UserRepository
 import io.ktor.application.*
 import io.ktor.http.*
@@ -39,16 +42,16 @@ fun Route.users(
     hashFunction: (String) -> String
 ) {
     post<UserCreateRoute> {
-        val signupParameters = call.receive<Parameters>()
-        val password = signupParameters["password"]
+        val registrationBody = call.receive<RegistrationBody>()
+        val password = registrationBody.password
             ?: return@post call.respond(
                 HttpStatusCode.Unauthorized, "Missing Fields"
             )
-        val displayName = signupParameters["displayName"]
+        val displayName = registrationBody.displayName
             ?: return@post call.respond(
                 HttpStatusCode.Unauthorized, "Missing Fields"
             )
-        val email = signupParameters["email"]
+        val email = registrationBody.email
             ?: return@post call.respond(
                 HttpStatusCode.Unauthorized, "Missing Fields"
             )
@@ -57,10 +60,11 @@ fun Route.users(
             val newUser = repository.addUser(email, displayName, hash)
             newUser?.userId?.let {
                 call.sessions.set(MySession(it))
-                call.respondText(
-                    jwtService.generateToken(newUser),
-                    status = HttpStatusCode.Created
+                val response = SessionResponse(
+                    token = jwtService.generateToken(newUser),
+                    userId = newUser.userId
                 )
+                call.respond(HttpStatusCode.Created, response)
             }
         } catch (e: Throwable) {
             application.log.error("Failed to register user", e)
@@ -69,12 +73,12 @@ fun Route.users(
     }
 
     post<UserLoginRoute> {
-        val signinParameters = call.receive<Parameters>()
-        val password = signinParameters["password"]
+        val loginBody = call.receive<LoginBody>()
+        val password = loginBody.password
             ?: return@post call.respond(
                 HttpStatusCode.Unauthorized, "Missing Fields"
             )
-        val email = signinParameters["email"]
+        val email = loginBody.email
             ?: return@post call.respond(
                 HttpStatusCode.Unauthorized, "Missing Fields"
             )
@@ -84,7 +88,11 @@ fun Route.users(
             currentUser?.userId?.let {
                 if (currentUser.passwordHash == hash) {
                     call.sessions.set(MySession(it))
-                    call.respondText(jwtService.generateToken(currentUser))
+                    val response = SessionResponse(
+                        token = jwtService.generateToken(currentUser),
+                        userId = currentUser.userId
+                    )
+                    call.respond(response)
                 } else {
                     call.respond(
                         HttpStatusCode.BadRequest, "Problems retrieving User"
