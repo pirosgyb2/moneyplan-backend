@@ -91,7 +91,7 @@ class TransactionRepository : ITransactionRepository {
     }
 
     private fun convertToElements(elementsString: String?): List<TransactionElement>? {
-        elementsString ?: return null
+        if (elementsString.isNullOrBlank()) return null
 
 
         val splitedByElements = elementsString.split(";")

@@ -5,5 +5,5 @@ data class Category(
     var userId: Int? = null,
     var name: String = "",
     var parent: Int? = null,
-    var childrenCategories: Array<Int>? = null,
+    var childrenCategories: List<Int>? = null,
 )

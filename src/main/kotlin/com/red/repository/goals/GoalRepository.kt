@@ -1,6 +1,7 @@
 package com.red.repository.goals
 
 import com.red.models.Goal
+import com.red.models.GoalSaving
 import com.red.repository.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.statements.InsertStatement
@@ -12,6 +13,7 @@ class GoalRepository : IGoalRepository {
         var statement: InsertStatement<Number>? = null
         dbQuery {
             statement = Goals.insert {
+                it[Goals.primaryKey] = "${goal.userId}_${goal.id}"
                 it[Goals.userId] = goal.userId ?: 0
                 it[Goals.id] = goal.id ?: 0
                 it[Goals.name] = goal.name ?: ""
@@ -19,7 +21,7 @@ class GoalRepository : IGoalRepository {
                 it[Goals.creationDate] = goal.creationDate ?: LocalDateTime.now()
                 it[Goals.goalMoney] = goal.goalMoney ?: 0.0
                 it[Goals.targetAmount] = goal.targetAmount ?: 0.0
-                it[Goals.savings] = goal.savings
+                it[Goals.savings] = convertSavingsToString(goal.savings)
 
             }
         }
@@ -63,7 +65,7 @@ class GoalRepository : IGoalRepository {
                     it[Goals.creationDate] = goal.creationDate ?: LocalDateTime.now()
                     it[Goals.goalMoney] = goal.goalMoney ?: 0.0
                     it[Goals.targetAmount] = goal.targetAmount ?: 0.0
-                    it[Goals.savings] = goal.savings
+                    it[Goals.savings] = convertSavingsToString(goal.savings)
                 })
         }
 
@@ -82,8 +84,51 @@ class GoalRepository : IGoalRepository {
             creationDate = row[Goals.creationDate],
             goalMoney = row[Goals.goalMoney],
             targetAmount = row[Goals.targetAmount],
-            savings = row[Goals.savings],
+            savings = convertToSavings(row[Goals.savings]),
         )
+    }
+
+    private fun convertToSavings(text: String?): List<GoalSaving>? {
+        if (text.isNullOrBlank()) return null
+
+        val splitedByElements = text.split(";")
+        val cleanedByClassName = splitedByElements.map {
+            it.subSequence(12, it.lastIndex)
+        }
+        val elements = cleanedByClassName.map { allParam ->
+            val params = allParam.split(",").map { paramWithValue ->
+                val separatedParamValue = paramWithValue.trim().split("=")
+                separatedParamValue[0] to separatedParamValue[1]
+            }
+
+            val id = params.find { it.first == "id" }?.second?.toLong() ?: 0
+            val userId = params.find { it.first == "userId" }?.second?.toInt() ?: -1
+            val goal = params.find { it.first == "goal" }?.second?.toInt() ?: -1
+            val amount = params.find { it.first == "amount" }?.second?.toDouble() ?: 0.0
+            val date = LocalDateTime.parse(params.find { it.first == "date" }?.second)
+
+
+            GoalSaving(
+                id = id,
+                userId = userId,
+                goal = goal,
+                amount = amount,
+                date = date
+            )
+        }
+        return elements
+    }
+
+    private fun convertSavingsToString(list: List<GoalSaving>?): String? {
+        list ?: return null
+        var result = ""
+        list.forEachIndexed { i, element ->
+            result += element.toString()
+            if (i != list.lastIndex) {
+                result += ";"
+            }
+        }
+        return result
     }
 
 }

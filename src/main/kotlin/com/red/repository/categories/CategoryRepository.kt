@@ -15,7 +15,7 @@ class CategoryRepository : ICategoriesRepository {
                 it[id] = category.id ?: 0
                 it[name] = category.name ?: ""
                 it[parent] = category.parent
-                it[childrenCategories] = category.childrenCategories
+                it[childrenCategories] = category.childrenCategories?.toTypedArray()
             }
         }
         return rowToCategory(statement?.resultedValues?.get(0))
@@ -54,7 +54,7 @@ class CategoryRepository : ICategoriesRepository {
                 {
                     it[name] = category.name ?: ""
                     it[parent] = category.parent
-                    it[childrenCategories] = category.childrenCategories
+                    it[childrenCategories] = category.childrenCategories?.toTypedArray()
                 })
         }
 
@@ -70,7 +70,7 @@ class CategoryRepository : ICategoriesRepository {
             userId = row[Categories.userId],
             name = row[Categories.name],
             parent = row[Categories.parent],
-            childrenCategories = row[Categories.childrenCategories],
+            childrenCategories = row[Categories.childrenCategories]?.toList(),
         )
     }
 }

@@ -14,6 +14,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.sessions.*
+import java.time.LocalDateTime
 
 const val GOAL = "$API_VERSION/goal"
 const val GOALS = "$API_VERSION/goals"
@@ -138,12 +139,13 @@ private suspend fun ApplicationCall.getUserId(userRepository: UserRepository): I
 }
 
 private suspend fun ApplicationCall.validateGoal(goal: Goal, userId: Int): Goal? {
-    if (goal.id == null) {
-        respond(HttpStatusCode.BadRequest, "Missing id")
-        return null
+    if (goal.id == null || goal.id == 0) {
+        val date = LocalDateTime.now()
+        goal.id =
+            "${date.monthValue}${date.dayOfMonth}${date.hour}${date.minute}${date.second}".toInt()
     }
 
-    if (goal.userId == null) {
+    if (goal.userId == null || goal.userId == -1) {
         goal.userId = userId
     }
 
