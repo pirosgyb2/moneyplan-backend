@@ -44,6 +44,13 @@ class GoalRepository : IGoalRepository {
         return deletedRowNumber > 0
     }
 
+    override suspend fun deleteGoals(userId: Int): Boolean {
+        val deletedRowNumber = dbQuery {
+            Goals.deleteWhere { Goals.userId.eq(userId) }
+        }
+        return deletedRowNumber > 0
+    }
+
     override suspend fun updateGoal(userId: Int, goal: Goal): Boolean {
 
         val updatedRows = dbQuery {

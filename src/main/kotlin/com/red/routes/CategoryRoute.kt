@@ -27,6 +27,10 @@ class CategoryRoute
 class CategoriesRoute
 
 @KtorExperimentalLocationsAPI
+@Location("$CATEGORY/{id}")
+class CategoryDeleteRoute(val id: Int)
+
+@KtorExperimentalLocationsAPI
 fun Route.categories(categoryRepository: CategoryRepository, userRepository: UserRepository) {
     authenticate("jwt") {
         post<CategoryRoute> {
@@ -51,6 +55,8 @@ fun Route.categories(categoryRepository: CategoryRepository, userRepository: Use
 
             val categories = call.receive<Array<Category>>()
             val savedCategories = ArrayList<Category>()
+
+            categoryRepository.deleteCategories(userId)
 
             categories.forEach { category ->
 
@@ -84,15 +90,9 @@ fun Route.categories(categoryRepository: CategoryRepository, userRepository: Use
             }
         }
 
-        delete<CategoryRoute> {
+        delete<CategoryDeleteRoute> { pathParams ->
             val userId = call.getUserId(userRepository) ?: return@delete
-
-            val params = call.receive<Parameters>()
-            val categoryId = params["categoryId"]?.toInt()
-            if (categoryId == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing category id")
-                return@delete
-            }
+            val categoryId = pathParams.id
 
             try {
                 val isSuccessful = categoryRepository.deleteCategory(userId, categoryId)

@@ -13,6 +13,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.sessions.*
+import java.time.LocalDateTime
 
 const val TRANSACTION = "$API_VERSION/transaction"
 const val TRANSACTIONS = "$API_VERSION/transactions"
@@ -24,6 +25,10 @@ class TransactionRoute
 @KtorExperimentalLocationsAPI
 @Location(TRANSACTIONS)
 class TransactionsRoute
+
+@KtorExperimentalLocationsAPI
+@Location("$TRANSACTION/{id}")
+data class TransactionDeleteRoute(val id: Int)
 
 @KtorExperimentalLocationsAPI
 fun Route.transactions(transactionRepository: TransactionRepository, userRepository: UserRepository) {
@@ -50,6 +55,8 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
 
             val transactions = call.receive<Array<Transaction>>()
             val savedTransactions = ArrayList<Transaction>()
+
+            transactionRepository.deleteTransactions(userId)
 
             transactions.forEach { transaction ->
 
@@ -83,15 +90,9 @@ fun Route.transactions(transactionRepository: TransactionRepository, userReposit
             }
         }
 
-        delete<TransactionRoute> {
+        delete<TransactionDeleteRoute> { routeParam ->
             val userId = call.getUserId(userRepository) ?: return@delete
-
-            val params = call.receive<Parameters>()
-            val transactionId = params["transactionId"]?.toInt()
-            if (transactionId == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing transaction id")
-                return@delete
-            }
+            val transactionId = routeParam.id
 
             try {
                 val isSuccessful = transactionRepository.deleteTransaction(userId, transactionId)
@@ -137,12 +138,13 @@ private suspend fun ApplicationCall.getUserId(userRepository: UserRepository): I
 }
 
 private suspend fun ApplicationCall.validateTransaction(transaction: Transaction, userId: Int): Transaction? {
-    if (transaction.id == null) {
-        respond(HttpStatusCode.BadRequest, "Missing id")
-        return null
+    if (transaction.id == null || transaction.id == 0) {
+        val date = LocalDateTime.now()
+        transaction.id =
+            "${date.monthValue}${date.dayOfMonth}${date.hour}${date.minute}${date.second}".toInt()
     }
 
-    if (transaction.userId == null) {
+    if (transaction.userId == null || transaction.userId == -1) {
         transaction.userId = userId
     }
 

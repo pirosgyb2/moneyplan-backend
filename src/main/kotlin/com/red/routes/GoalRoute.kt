@@ -27,6 +27,10 @@ class GoalRoute
 class GoalsRoute
 
 @KtorExperimentalLocationsAPI
+@Location("$GOAL/{id}")
+class GoalDeleteRoute(val id: Int)
+
+@KtorExperimentalLocationsAPI
 fun Route.goals(goalRepository: GoalRepository, userRepository: UserRepository) {
     authenticate("jwt") {
         post<GoalRoute> {
@@ -51,6 +55,8 @@ fun Route.goals(goalRepository: GoalRepository, userRepository: UserRepository) 
 
             val goals = call.receive<Array<Goal>>()
             val savedGoals = ArrayList<Goal>()
+
+            goalRepository.deleteGoals(userId)
 
             goals.forEach { goal ->
 
@@ -84,15 +90,9 @@ fun Route.goals(goalRepository: GoalRepository, userRepository: UserRepository) 
             }
         }
 
-        delete<GoalRoute> {
+        delete<GoalDeleteRoute> { pathParams ->
             val userId = call.getUserId(userRepository) ?: return@delete
-
-            val params = call.receive<Parameters>()
-            val goalId = params["goalId"]?.toInt()
-            if (goalId == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing goal id")
-                return@delete
-            }
+            val goalId = pathParams.id
 
             try {
                 val isSuccessful = goalRepository.deleteGoal(userId, goalId)

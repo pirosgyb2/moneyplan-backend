@@ -10,6 +10,6 @@ data class Transaction(
     var currency: String = "HUF",
     var date: LocalDateTime = LocalDateTime.now(),
     var categories: Array<Int>? = null,
-    var elements: Array<Int>? = null,
+    var elements: List<TransactionElement>? = null,
     var type: String? = null
 )

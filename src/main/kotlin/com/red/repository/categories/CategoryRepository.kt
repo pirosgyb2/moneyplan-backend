@@ -39,6 +39,13 @@ class CategoryRepository : ICategoriesRepository {
         return deletedRowNumber > 0
     }
 
+    override suspend fun deleteCategories(userId: Int): Boolean {
+        val deletedRowNumber = DatabaseFactory.dbQuery {
+            Categories.deleteWhere { Categories.userId.eq(userId) }
+        }
+        return deletedRowNumber > 0
+    }
+
     override suspend fun updateCategory(userId: Int, category: Category): Boolean {
         val updatedRows = DatabaseFactory.dbQuery {
             Categories.update(
