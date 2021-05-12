@@ -6,6 +6,7 @@ import com.red.auth.MySession
 import com.red.models.containers.LoginBody
 import com.red.models.containers.RegistrationBody
 import com.red.models.containers.SessionResponse
+import com.red.models.containers.UserResponse
 import com.red.repository.users.UserRepository
 import io.ktor.application.*
 import io.ktor.http.*
@@ -19,6 +20,7 @@ const val USERS = "$API_VERSION/users"
 const val USER_LOGIN = "$USERS/login"
 const val USER_CREATE = "$USERS/create"
 const val USER_LOGOUT = "$USERS/logout"
+const val USER_ME = "$USERS/me"
 
 
 @KtorExperimentalLocationsAPI
@@ -33,6 +35,10 @@ class UserCreateRoute
 @KtorExperimentalLocationsAPI
 @Location(USER_LOGOUT)
 class UserLogoutRoute
+
+@KtorExperimentalLocationsAPI
+@Location(USER_ME)
+class UserMeRoute
 
 
 @KtorExperimentalLocationsAPI
@@ -115,4 +121,28 @@ fun Route.users(
         }
     }
 
+    get<UserMeRoute> {
+        val userId = call.getUserId(repository) ?: return@get
+
+        try {
+            val user = repository.findUser(userId)
+            if (user == null) {
+                call.respond(HttpStatusCode.BadRequest, "There is no user with that id")
+            } else {
+                call.respond(UserResponse(userName = user.displayName, userEmail = user.email))
+            }
+        } catch (e: Throwable) {
+            application.log.error("Failed to get transactions", e)
+            call.respond(HttpStatusCode.BadRequest, "Problems getting transactions")
+        }
+    }
+
+}
+
+private suspend fun ApplicationCall.getUserId(userRepository: UserRepository): Int? {
+    val user = sessions.get<MySession>()?.let { userRepository.findUser(it.userId) }
+    if (user == null) {
+        respond(HttpStatusCode.Unauthorized)
+    }
+    return user?.userId
 }
