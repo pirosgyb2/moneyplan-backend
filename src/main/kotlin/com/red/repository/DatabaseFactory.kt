@@ -36,6 +36,10 @@ object DatabaseFactory {
         config.username = getUsername(System.getenv("DATABASE_URL"))
         config.password = getPassword(System.getenv("DATABASE_URL"))
 
+        println(config.jdbcUrl)
+        println(config.username)
+        println(config.password)
+
         config.validate()
         return HikariDataSource(config)
     }
