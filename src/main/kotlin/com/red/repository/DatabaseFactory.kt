@@ -28,18 +28,13 @@ object DatabaseFactory {
     private fun hikari(): HikariDataSource {
         val config = HikariConfig()
         config.driverClassName = System.getenv("JDBC_DRIVER")
-        config.jdbcUrl = System.getenv("JDBC_DATABASE_URL")
+        config.jdbcUrl = convertdatabseUrlToJDBSScheme(System.getenv("DATABASE_URL"))
         config.maximumPoolSize = 3
         config.isAutoCommit = false
         config.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
 
-        System.getenv("DB_USER")?.let {
-            config.username = it
-        }
-
-        System.getenv("DB_PASSWORD")?.let {
-            config.password = it
-        }
+        config.username = getUsername(System.getenv("DATABASE_URL"))
+        config.password = getPassword(System.getenv("DATABASE_URL"))
 
         config.validate()
         return HikariDataSource(config)
@@ -49,4 +44,32 @@ object DatabaseFactory {
         withContext(Dispatchers.IO) {
             transaction { block() }
         }
+
+    private fun convertdatabseUrlToJDBSScheme(hikariUrl: String): String {
+        val withoutHead = hikariUrl.drop(11)
+        val credentialsAndUrl = withoutHead.split('@')
+        val url = credentialsAndUrl[1]
+
+        val credentials = credentialsAndUrl[0].split(':')
+        val username = credentials[0]
+        val password = credentials[1]
+
+        return "jdbc:postgresql://$url?user=$username&password=$password"
+    }
+
+    private fun getUsername(hikariUrl: String): String{
+        val withoutHead = hikariUrl.drop(11)
+        val credentialsAndUrl = withoutHead.split('@')
+        val credentials = credentialsAndUrl[0].split(':')
+        val username = credentials[0]
+        return username
+    }
+
+    private fun getPassword(hikariUrl: String): String{
+        val withoutHead = hikariUrl.drop(11)
+        val credentialsAndUrl = withoutHead.split('@')
+        val credentials = credentialsAndUrl[0].split(':')
+        val password = credentials[1]
+        return password
+    }
 }
