@@ -1,0 +1,598 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server MoneyPlan server."
+  version: "1.0.0"
+  title: "MoneyPlan"
+host: "petstore.swagger.io"
+basePath: "/v1"
+tags:
+- name: "users"
+  description: "Operations about users"
+- name: "transactions"
+  description: "Operations about transaction"
+- name: "goals"
+  description: "Operations about goals"
+- name: "categories"
+  description: "Operations about categories"
+schemes:
+- "https"
+paths:
+  /users/me:
+    get:
+      tags:
+      - "users"
+      summary: "Get the logged in user data"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "The logged in user data"
+          schema:
+            $ref: '#/definitions/UserResponse'
+        "400":
+          description: "No actual user"
+  /users/create:
+    post:
+      tags:
+      - "users"
+      summary: "Registrate a user with the given data and create session for him/her"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/RegistrationBody"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "401":
+          description: "Unauthorized - Missing data from the request"
+        "201":
+          description: "Created - User created successfully"
+          schema:
+            $ref: '#/definitions/SessionResponse'
+  /users/login:
+    post:
+      tags:
+      - "users"
+      summary: "Login with the given email and password"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/LoginBody"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "401":
+          description: "Unauthorized - Missing data from the request"
+        "201":
+          description: "Created - User created successfully"
+          schema:
+            $ref: '#/definitions/SessionResponse'
+  /users/logout:
+    post:
+      tags:
+      - "users"
+      summary: "Log out the currently logged in user"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - User successfully logged out"
+  /transaction:
+    post:
+      tags:
+      - "transactions"
+      summary: "Save the given transaction"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Transaction"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            $ref: '#/definitions/Transaction'
+      
+    put:
+      tags:
+      - "transactions"
+      summary: "Update the given transaction"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Transaction"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          
+  /transaction/{id}:
+    delete:
+      tags:
+      - "transactions"
+      summary: "Delete a transaction by its  id"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of transaction that asked to be deleted"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          
+  /transactions:
+    post:
+      tags:
+      - "transactions"
+      summary: "Save the given transactions"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          type: "array"
+          items:
+             $ref: "#/definitions/Transaction"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Transaction'
+        
+    get:
+      tags:
+      - "transactions"
+      summary: "Get all transactions for the logged in user"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Transaction'
+              
+  /goal:
+    post:
+      tags:
+      - "goals"
+      summary: "Save the given goal"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Goal"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+              $ref: '#/definitions/Goal'
+      
+    put:
+      tags:
+      - "goals"
+      summary: "Update the given goal"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Goal"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+  
+  /goal/{id}:
+    delete:
+      tags:
+      - "goals"
+      summary: "Delete a goals by its id"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of goal that asked to be deleted"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          
+  /goals:
+    post:
+      tags:
+      - "goals"
+      summary: "Save the given goals"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/Goal"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Goal'
+              
+    get:
+      tags:
+      - "goals"
+      summary: "Get all goals for the logged in user"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Goal'
+
+  /category:
+    post:
+      tags:
+      - "categories"
+      summary: "Save the given category"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Category"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+              $ref: '#/definitions/Category'
+      
+    put:
+      tags:
+      - "categories"
+      summary: "Update the given category"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Category"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+  
+  /category/{id}:
+    delete:
+      tags:
+      - "categories"
+      summary: "Delete a category by its id"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of category that asked to be deleted"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          
+  /categories:
+    post:
+      tags:
+      - "categories"
+      summary: "Save the given categories"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/Category"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Category'
+              
+    get:
+      tags:
+      - "categories"
+      summary: "Get all goals for the logged in user"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "400":
+          description: "Bad Request - Problems with performing the operation with the given data"
+        "200":
+          description: "OK - Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Category'
+
+definitions:
+  RegistrationBody:
+    type: "object"
+    properties:
+      displayName:
+          type: "string"
+      email:
+          type: "string"
+      password:
+          type: "string"
+          
+  UserResponse:
+    type: "object"
+    properties:
+      userName:
+        type: "string"
+      userEmail:
+        type: "string"
+        
+  SessionResponse:
+    type: "object"
+    properties:
+      token:
+        type: "string"
+      userId:
+        type: "integer"
+        
+  LoginBody:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      password:
+        type: "string"
+        
+  Transaction:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "integer"
+      name:
+        type: "string"
+      currency:
+        type: "string"
+      date:
+        $ref: "#/definitions/LocalDateTime"
+      categories:
+        type: "array"
+        items:
+          type: "integer"
+      elements:
+        type: "array"
+        items:
+          $ref: "#/definitions/TransactionElement"
+      type: 
+        type: "string"
+        
+  TransactionElement:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "integer"
+      name:
+        type: "string"
+      cost:
+        type: "integer"
+      categories:
+        type: "array"
+        items:
+          type: "integer"
+        
+  LocalDateTime:
+    type: "object"
+    properties:
+      date:
+        type: "string"
+      time:
+        type: "string"
+
+  Goal:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "integer"
+      name:
+        type: "string"
+      currency:
+        type: "string"
+      targetDate:
+        $ref: "#/definitions/LocalDateTime"
+      creationDate:
+        $ref: "#/definitions/LocalDateTime"
+      targetAmount:
+        type: "integer"
+      savings:
+        type: "array"
+        items:
+          $ref: "#/definitions/GoalSaving"
+          
+  GoalSaving:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "integer"
+      goal:
+        type: "integer"
+      currency:
+        type: "string"
+      amount:
+        type: "integer" 
+      date:
+        $ref: "#/definitions/LocalDateTime"
+        
+  Category:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "integer"
+      name:
+        type: "string"
+      parent:
+        type: "integer"
+      childrenCategories:
+        type: "array"
+        items: 
+          type: "integer"
+          
+      
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
